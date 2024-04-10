@@ -12,21 +12,22 @@ def cleanup():
     print("\n---> CLEANUP COMPLETE :)\n")
 
 
-# set up the board
+# board setup
 GPIO.setwarnings(False)
 GPIO.setmode(GPIO.BCM)
 
-# setup the gui
-window = Tk()
-window.title("LED controller")
-Label(window, text="Select the LED you want to light:").pack(anchor="w")
+# gui setup
+guiWindow = Tk()
+guiWindow.title("LED controller")
+Label(guiWindow, text="Select the LED you want to light up:").pack(anchor="w")
 
-# track state of the GUI
-dummyPin = 0
-previouslySelectedLed = dummyPin
-uiLedSelection = IntVar(window, dummyPin)
+# set up state-management for radio buttons
+nothingSelected = None
+previouslySelectedLed = nothingSelected
+# tkinter variable: track which radio button is selected
+guiSelectedRadioButton = IntVar(guiWindow, nothingSelected)
 
-# prepare GPIO pins for use
+# prepare GPIO pin data
 redPin = 17
 greenPin = 27
 bluePin = 22
@@ -43,41 +44,41 @@ allValidPins = list(ledNames.keys())
 # light up the selected LED on the breadboard
 def activateChosenLed():
     # get shared variables
-    global uiLedSelection
+    global guiSelectedRadioButton
     global previouslySelectedLed
-    _selectedPin = uiLedSelection.get()
+    _selectedPin = guiSelectedRadioButton.get()
 
     # stop here if chosen pin is invalid
     if _selectedPin not in allValidPins:
         print(f'ERROR: Pin "{_selectedPin}" is not a valid selection')
         return
 
-    # if led was lit up before, turn it off now
-    if previouslySelectedLed != dummyPin:
+    # if an LED was lit up before, turn it off now
+    if previouslySelectedLed != nothingSelected:
         GPIO.output(previouslySelectedLed, GPIO.LOW)
 
-    # light up selected led
+    # light up selected LED
     GPIO.output(_selectedPin, GPIO.HIGH)
 
-    # update tracker
+    # update state-tracking
     previouslySelectedLed = _selectedPin
 
 
-# setup GPIO and generate radio butons for pins
+# set up LED GPIO pins and GUI radio buttons
 for _ledPin in allValidPins:
-    # create a radio button for this pin
-    Radiobutton(
-        window,
-        text=ledNames[_ledPin],
-        variable=uiLedSelection,
-        value=int(_ledPin),
-        command=activateChosenLed,
-    ).pack(anchor="w")
-
     # setup GPIO for this pin
     GPIO.setup(_ledPin, GPIO.OUT)
     GPIO.output(_ledPin, GPIO.LOW)
     time.sleep(0.25)
 
-# open the window
-window.mainloop()
+    # create a GUI radio button for this LED
+    Radiobutton(
+        guiWindow,
+        text=ledNames[_ledPin],
+        variable=guiSelectedRadioButton,
+        value=int(_ledPin),
+        command=activateChosenLed,
+    ).pack(anchor="w")
+
+# open the GUI window
+guiWindow.mainloop()
