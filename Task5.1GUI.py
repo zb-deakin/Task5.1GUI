@@ -19,7 +19,7 @@ GPIO.setmode(GPIO.BCM)
 # gui setup
 guiWindow = Tk()
 guiWindow.title("LED controller")
-Label(guiWindow, text="Select the LED you want to light up:").pack(anchor="w")
+Label(guiWindow, text="Select the LED you want to light up:", padx=25, pady=10).pack(anchor="w")
 
 # set up state-management for radio buttons
 nothingSelected = None
@@ -75,10 +75,14 @@ for _ledPin in allValidPins:
     Radiobutton(
         guiWindow,
         text=ledNames[_ledPin],
-        variable=guiSelectedRadioButton,
         value=int(_ledPin),
+        variable=guiSelectedRadioButton,
         command=activateChosenLed,
-    ).pack(anchor="w")
+        width=25,
+        justify=LEFT,
+    ).pack()
+
+Label(guiWindow, text=" ").pack()
 
 # open the GUI window
 guiWindow.mainloop()
